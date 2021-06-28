@@ -1,0 +1,61 @@
+server:
+  port: 8090
+
+spring:
+  mvc:
+    view:
+      prefix: /jsp/
+      suffix: .jsp
+#  rabbitmq:
+#    host: localhost
+#    username: guest
+#    password: guest
+#    virtual-host: /
+#    publisher-confirms: true   #开启发送确认
+#    publisher-returns: true  #开启发送失败回退#开启ack
+#    listener:
+#      direct:
+#        acknowledge-mode: manual
+#      simple:
+#        acknowledge-mode: manual #采取手动应答
+#        #concurrency: 1 # 指定最小的消费者数量
+#        #max-concurrency: 1 #指定最大的消费者数量
+#        retry:
+#          enabled: true # 是否支持重试
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+#elasticjob配置
+#elasticjob.jobs 是一个 Map，key 为作业名称，value 为作业类型与配置。 Starter 会根据该配置自动创建 OneOffJobBootstrap 或 ScheduleJobBootstrap 的实例并注册到 Spring 容器中。
+#配置了cron属性为定时调度作业，starter在启动时，自动启动。
+#否则为一次性调度作业，需要通过JobBootStrapBeanName指定OneOffJobBootstrap Bean的名称，触发点注入OneOffJobBootstrap的实例，手动调用execute()方法
+#elasticjob:
+#  regCenter:
+#    serverLists: 127.0.0.1:2181 #zookeeper ip地址
+#    namespace: elasticjob-list-bootdemo
+#  jobs:
+#    simpleJob:
+#      elasticJobClass: com.springbootjsp.elasticjob.MySimpleElasticJob
+#      cron: 0/5 * * * * ? #5秒钟执行一次
+#      shardingTotalCount: 3 # 分片总数
+#      shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou # 分片号
+#    scriptJob:
+#      elasticJobType: SCRIPT
+#      cron: 0/10 * * * * ?
+#      shardingTotalCount: 3
+#      props:
+#        script.command.line: "echo SCRIPT Job: "
+
+#手动写配置
+regCenter:
+  serverLists: 127.0.0.1:2181 #zookeeper ip地址
+  namespace: elastic-job-lite-springboot
+mySimpleJob:
+  cron: 0/5 * * * * ? #5秒钟执行一次
+  shardingTotalCount: 3 # 分片总数
+  shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou # 分片号
+
+
+
+
