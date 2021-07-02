@@ -1,4 +1,4 @@
-package com.springbootjsp.redis;
+package com.springbootjsp.redisDealyQueue;
 
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +13,18 @@ import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * 初始化队列监听
- */
 
+/**
+ * @Author tangmf
+ * @Date 2021/7/2 3:04 下午
+ * @Description 初始化队列监听
+ * 1、通过applictionContext，设置队列名称，
+ * 2、启动线程获取队列
+ */
 @Component
 @Slf4j
 public class RedisDelayedQueueInit implements ApplicationContextAware {
@@ -28,8 +34,8 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
 
     /**
      * 获得RDelayedQueueListener的实现类
-     * @param applicationContext
-     * @throws BeansException
+     *
+     * @param applicationContext applicationContext上下文
      */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -38,18 +44,16 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
             /*是否使用bean的名字作为队列的名字*/
             boolean useBeanName = true;
             String listenerName = taskEventListenerEntry.getValue().getClass().getName();
-            for(Annotation anno : taskEventListenerEntry.getValue().getClass().getAnnotations()){
-                if(anno.annotationType().equals(DelayQueueNameAnnotation.class)){
+            for (Annotation anno : taskEventListenerEntry.getValue().getClass().getAnnotations()) {
+                if (anno.annotationType().equals(DelayQueueNameAnnotation.class)) {
                     String queueName = ((DelayQueueNameAnnotation) anno).name();
-                    if(queueName != null){
-                        /*使用了注解上的名字作为队列名*/
-                        useBeanName = false;
-                        startThread(queueName, taskEventListenerEntry.getValue());
-                        break;
-                    }
+                    /*使用了注解上的名字作为队列名*/
+                    useBeanName = false;
+                    startThread(queueName, taskEventListenerEntry.getValue());
+                    break;
                 }
             }
-            if(useBeanName){
+            if (useBeanName) {
                 /*使用全类名作为队列名字*/
                 startThread(listenerName, taskEventListenerEntry.getValue());
             }
@@ -57,23 +61,48 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
     }
 
     /**
-     * 启动线程获取队列*
+     * 启动线程获取队列
      *
      * @param queueName                 queueName
      * @param redisDelayedQueueListener 任务回调监听
      * @param <T>                       泛型
-     * @return
      */
     private <T> void startThread(String queueName, RDelayedQueueListener redisDelayedQueueListener) {
         RBlockingQueue<T> blockingQueue = redissonClient.getBlockingQueue(queueName);
 
-        //***************************以下逻辑解决重启服务不消费问题****************
+
+        // 应用启动时往队列里面放一个空值【如果不放数据,重启应用可能导致队列已有的数据消费不及时】
+        //延迟队列take数据阻塞，不执行，必须等到下一个内容offer时，队列才会把阻塞的消息全部处理掉
         RDelayedQueue<T> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
-        TaskDTO taskBody = new TaskDTO();
-        taskBody.setBody("test");
-        taskBody.setName("test");
-        delayedQueue.offer((T)taskBody, 1, TimeUnit.SECONDS);
+        delayedQueue.offer(null, 1, TimeUnit.SECONDS);
+        //***************************以下逻辑解决重启服务不消费问题****************
+        //RDelayedQueue<T> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
+        //TaskDTO taskBody = new TaskDTO();
+        //taskBody.setBody("test");
+        //taskBody.setName("test");
+        //delayedQueue.offer((T) taskBody, 1, TimeUnit.SECONDS);
         //*********************************************************************
+
+        //Thread thread = new Thread(() -> {
+        //    log.info("启动监听队列线程" + queueName);
+        //    while (true) {
+        //        try {
+        //            T t = blockingQueue.take();
+        //            log.info("监听队列线程{},获取到值:{}", queueName, JSON.toJSONString(t));
+        //            new Thread(() -> {
+        //                redisDelayedQueueListener.invoke(t);
+        //            }).start();
+        //        } catch (Exception e) {
+        //            log.info("监听队列线程错误,", e);
+        //            try {
+        //                Thread.sleep(10000);
+        //            } catch (InterruptedException ex) {
+        //            }
+        //        }
+        //    }
+        //});
+        //thread.setName(queueName);
+        //thread.start();
 
         Thread thread = new Thread(() -> {
             log.info("启动监听队列线程" + queueName);
@@ -81,14 +110,17 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
                 try {
                     T t = blockingQueue.take();
                     log.info("监听队列线程{},获取到值:{}", queueName, JSON.toJSONString(t));
-                    new Thread(() -> {
-                        redisDelayedQueueListener.invoke(t);
-                    }).start();
+                    //线程池进行任务回调监听
+                    ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 2, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+                    //启动任务回调监听
+                    pool.execute(() -> redisDelayedQueueListener.invoke(t));
+                    pool.shutdown();
                 } catch (Exception e) {
                     log.info("监听队列线程错误,", e);
                     try {
                         Thread.sleep(10000);
                     } catch (InterruptedException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -96,5 +128,4 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
         thread.setName(queueName);
         thread.start();
     }
-
 }
