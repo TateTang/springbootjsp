@@ -2,7 +2,7 @@ package com.springbootjsp.controller;
 
 import com.springbootjsp.redisDealyQueue.OrderDelayedQueueService;
 import com.springbootjsp.redisDealyQueue.OrderListener;
-import com.springbootjsp.redisDealyQueue.TaskDTO;
+import com.springbootjsp.redisDealyQueue.TaskDto;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +32,7 @@ public class DoSchedulerController {
     }
 
     public void run() {
-        TaskDTO taskBody = new TaskDTO();
+        TaskDto taskBody = new TaskDto();
         taskBody.setBody("3秒之后执行");
         taskBody.setName("订单1");
         //添加队列3秒之后执行
@@ -65,7 +65,7 @@ public class DoSchedulerController {
         //orderDelayedQueue.addQueue(taskBody, 120, TimeUnit.SECONDS, OrderListener.class.getName());
     }
     public void run1() {
-        TaskDTO taskBody = new TaskDTO();
+        TaskDto taskBody = new TaskDto();
         taskBody.setBody("3秒之后执行");
         taskBody.setName("订单1");
         //添加队列3秒之后执行

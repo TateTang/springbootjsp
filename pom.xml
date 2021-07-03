@@ -62,11 +62,13 @@
             <artifactId>spring-boot-starter-quartz</artifactId>
         </dependency>
         <!--Quartz 使用的连接池  这里Quartz在持久化任务时使用该jar-->
+        <!-- https://mvnrepository.com/artifact/com.mchange/c3p0 -->
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
-            <version>0.9.5.2</version>
+            <version>0.9.5.5</version>
         </dependency>
+
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
@@ -172,7 +174,18 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <!--hutool-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.6.7</version>
+        </dependency>
+        <!-- yml配置类注解 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>

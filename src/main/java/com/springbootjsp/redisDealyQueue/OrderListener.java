@@ -11,10 +11,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @DelayQueueNameAnnotation(name = "order_delay_queue")//加上注解，定义延迟队列名称
-public class OrderListener implements RDelayedQueueListener<TaskDTO> {
+public class OrderListener implements RDelayedQueueListener<TaskDto> {
 
     @Override
-    public void invoke(TaskDTO taskDTO) {
-        log.info("执行....{}", taskDTO);
+    public void invoke(TaskDto taskDto) {
+        log.info("执行....{}，参数：name{}，body：{}", taskDto,
+                taskDto.getName(), taskDto.getBody());
     }
 }

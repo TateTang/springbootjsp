@@ -74,7 +74,10 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
         // 应用启动时往队列里面放一个空值【如果不放数据,重启应用可能导致队列已有的数据消费不及时】
         //延迟队列take数据阻塞，不执行，必须等到下一个内容offer时，队列才会把阻塞的消息全部处理掉
         RDelayedQueue<T> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
-        delayedQueue.offer(null, 1, TimeUnit.SECONDS);
+        TaskDto dto = new TaskDto();
+        dto.setName("test");
+        dto.setBody("test");
+        delayedQueue.offer((T) dto, 1, TimeUnit.SECONDS);
         //***************************以下逻辑解决重启服务不消费问题****************
         //RDelayedQueue<T> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
         //TaskDTO taskBody = new TaskDTO();
