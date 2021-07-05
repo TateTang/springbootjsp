@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
@@ -70,7 +68,6 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
     private <T> void startThread(String queueName, RDelayedQueueListener redisDelayedQueueListener) {
         RBlockingQueue<T> blockingQueue = redissonClient.getBlockingQueue(queueName);
 
-
         // 应用启动时往队列里面放一个空值【如果不放数据,重启应用可能导致队列已有的数据消费不及时】
         //延迟队列take数据阻塞，不执行，必须等到下一个内容offer时，队列才会把阻塞的消息全部处理掉
         RDelayedQueue<T> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
@@ -107,23 +104,21 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
         //thread.setName(queueName);
         //thread.start();
 
+        //由于此线程需要常驻，可以新建线程，不用交给线程池管理
         Thread thread = new Thread(() -> {
             log.info("启动监听队列线程" + queueName);
             while (true) {
                 try {
                     T t = blockingQueue.take();
                     log.info("监听队列线程{},获取到值:{}", queueName, JSON.toJSONString(t));
-                    //线程池进行任务回调监听
-                    ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 2, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
-                    //启动任务回调监听
-                    pool.execute(() -> redisDelayedQueueListener.invoke(t));
-                    pool.shutdown();
+                    new Thread(() -> {
+                        redisDelayedQueueListener.invoke(t);
+                    }).start();
                 } catch (Exception e) {
                     log.info("监听队列线程错误,", e);
                     try {
                         Thread.sleep(10000);
                     } catch (InterruptedException ex) {
-                        ex.printStackTrace();
                     }
                 }
             }
