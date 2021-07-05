@@ -6,13 +6,14 @@ import com.dangdang.ddframe.job.reg.zookeeper.ZookeeperRegistryCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @Author tangmf
  * @Date 2021/6/28 10:44 上午
  * @Description 配置MySimpleJob
  */
-//@Configuration
+@Configuration
 public class MySimpleJobConf {
     @Autowired
     private ZookeeperRegistryCenter regCenter;

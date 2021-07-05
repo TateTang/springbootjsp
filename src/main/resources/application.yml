@@ -6,6 +6,12 @@ spring:
     view:
       prefix: /jsp/
       suffix: .jsp
+  #数据库配置
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/job?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8&allowMultiQueries=true
+    username: root
+    password: root
 #  rabbitmq:
 #    host: localhost
 #    username: guest
@@ -52,7 +58,8 @@ regCenter:
   serverLists: 127.0.0.1:2181 #zookeeper ip地址
   namespace: elastic-job-lite-springboot
 mySimpleJob:
-  cron: 0/5 * * * * ? #5秒钟执行一次
+#  cron: 0/5 * * * * ? #5秒钟执行一次
+  cron: 0 0/10 * * * ? * #10分钟执行一次
   shardingTotalCount: 3 # 分片总数
   shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou # 分片号
 
