@@ -55,13 +55,10 @@ spring:
 
 #手动写配置
 regCenter:
-  serverLists: 127.0.0.1:2181 #zookeeper ip地址
+#  serverLists: 127.0.0.1:2181 #zookeeper ip地址
+#  serverLists: 192.168.10.72:2181
+  serverLists: 192.168.10.75:2181,192.168.10.75:2182,192.168.10.75:2183
   namespace: elastic-job-lite-springboot
-mySimpleJob:
-#  cron: 0/5 * * * * ? #5秒钟执行一次
-  cron: 0 0/10 * * * ? * #10分钟执行一次
-  shardingTotalCount: 3 # 分片总数
-  shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou # 分片号
 
 
 
@@ -70,6 +67,6 @@ mySimpleJob:
 redisson:
   masterName: mymaster
   schema: redis://
-#  sentinelAddresses: 192.168.10.2:26379,192.168.10.145:26379,192.168.10.146:26379
-  sentinelAddresses: 127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381
-#  password: 12345678
+  sentinelAddresses: 192.168.10.2:26379,192.168.10.145:26379,192.168.10.146:26379
+#  sentinelAddresses: 127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381
+  password: 12345678

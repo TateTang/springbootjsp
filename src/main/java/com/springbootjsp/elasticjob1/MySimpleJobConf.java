@@ -1,23 +1,24 @@
-package com.springbootjsp.elasticjob;
+package com.springbootjsp.elasticjob1;
 
 import com.dangdang.ddframe.job.lite.api.JobScheduler;
 import com.dangdang.ddframe.job.lite.spring.api.SpringJobScheduler;
-import com.dangdang.ddframe.job.reg.zookeeper.ZookeeperRegistryCenter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.dangdang.ddframe.job.reg.base.CoordinatorRegistryCenter;
+import com.springbootjsp.elasticjob.MySimpleJob;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.Resource;
 
 /**
  * @Author tangmf
  * @Date 2021/6/28 10:44 上午
  * @Description 配置MySimpleJob
  */
-@Configuration
+//@Configuration
 public class MySimpleJobConf {
-    @Autowired
-    private ZookeeperRegistryCenter regCenter;
-    @Autowired
+    @Resource
+    private CoordinatorRegistryCenter regCenter;
+    @Resource
     private MySimpleJob mySimpleJob;
 
     /**

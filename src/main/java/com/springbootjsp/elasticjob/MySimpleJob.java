@@ -15,6 +15,14 @@ import java.time.format.DateTimeFormatter;
  */
 @Slf4j
 @Component
+@ElasticSimpleJob(
+        jobName = "orderSimpleJob",
+        cron = "0/5 * * * * ?",   //每5秒执行一次
+        //cron = "0 0/10 * * * ? *",   //每10分钟执行一次
+        shardingTotalCount = 3,
+        shardingItemParameters = "0=A,1=B,2=C",
+        overwrite = true
+)
 public class MySimpleJob implements SimpleJob {
     @Override
     public void execute(ShardingContext context) {
@@ -22,11 +30,10 @@ public class MySimpleJob implements SimpleJob {
         String format = "YYYY-MM-dd hh:mm:ss";
         // DateTimeFormatter.ofPattern方法根据指定的格式输出时间
         String formatDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern(format));
-        log.info(context.getJobName() + "执行:" +
-                "分片参数:" + context.getShardingParameter() +
-                ",当前分片项:" + context.getShardingItem() +
-                ",time:" + formatDateTime
-        );
+        log.info("{}===>执行：分片参数：{}，当前分片项：{}，分片总数：{}，time：{}"
+                , context.getJobName(), context.getShardingParameter()
+                , context.getShardingItem(), context.getShardingTotalCount()
+                , formatDateTime);
         //switch (context.getShardingItem()) {
         //    case 0:
         //        System.out.println("分片0定时任务");

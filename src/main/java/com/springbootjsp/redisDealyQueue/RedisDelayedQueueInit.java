@@ -117,8 +117,10 @@ public class RedisDelayedQueueInit implements ApplicationContextAware {
                 } catch (Exception e) {
                     log.info("监听队列线程错误,", e);
                     try {
-                        Thread.sleep(10000);
+                        TimeUnit.SECONDS.sleep(10);
+                        //Thread.sleep(10000);
                     } catch (InterruptedException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }

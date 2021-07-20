@@ -1,4 +1,4 @@
-package com.springbootjsp.elasticjob;
+package com.springbootjsp.elasticjob1;
 
 import com.dangdang.ddframe.job.api.dataflow.DataflowJob;
 import com.dangdang.ddframe.job.api.simple.SimpleJob;
